@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALL IN ONE, AI-POWERED LANGUAGE LEARNING PLATFORM</title>
+    <title>ALL IN ONE, AI-POWERED LANGUAGE LEARNING PLATFORM
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    </title>
 </head>
     <!-- In your index.html -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -56,6 +58,14 @@
     <img src="C:\Users\YASIR ZAHOOR\OneDrive\Pictures\Screenshots\Screenshot (109).png"  alt="logo" width="250px">
   </section>
     <style> 
+         body { font-family: Arial; background:#f5f6fa; margin:0; }
+    .container { max-width:400px; margin:50px auto; padding:20px; background:white; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,.1); }
+    h2 { text-align:center; }
+    input, button, select { width:100%; margin:8px 0; padding:10px; border:1px solid #ddd; border-radius:8px; }
+    button { background:#4CAF50; color:white; border:none; cursor:pointer; }
+    button:hover { background:#45a049; }
+    .link { color:blue; cursor:pointer; text-align:center; display:block; margin-top:10px; }
+    .hidden { display:none; }
     section{
         text-align: center;
         color: rgb(255, 0, 0);
@@ -515,33 +525,6 @@ html {
             </ul>
         </nav>
     </div>
- <!-- Login Form -->
-<div id="auth-section">
-  <h2>Login</h2>
-  <input type="email" id="login-email" placeholder="Email" />
-  <input type="password" id="login-password" placeholder="Password" />
-  <button onclick="login()">Login</button>
-
-  <p><a href="#" onclick="forgotPassword()">Forgot Password?</a></p>
-  <p>Don’t have an account? <a href="#" onclick="showSignup()">Create here</a></p>
-</div>
-
-<!-- Signup Form (hidden initially) -->
-<div id="signup-section" style="display:none;">
-  <h2>Create Account</h2>
-  <input type="email" id="signup-email" placeholder="Email" />
-  <input type="password" id="signup-password" placeholder="Password" />
-  <button onclick="signup()">Sign Up</button>
-
-  <p>Already have an account? <a href="#" onclick="showLogin()">Login here</a></p>
-</div>
-
-<!-- Dashboard (hidden until logged in) -->
-<div id="dashboard" style="display:none;">
-  <h2>Welcome <span id="user-email"></span></h2>
-  <p>📘 Courses in progress will appear here...</p>
-  <button onclick="logout()">Logout</button>
-</div>
 
 <script>
   function showAuth() {
@@ -791,76 +774,152 @@ html {
     }
   };
 </script></p>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<div class="container" id="loginBox">
+  <h2>Login</h2>
+  <input id="loginEmail" type="email" placeholder="Email">
+  <input id="loginPassword" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <span class="link" onclick="showBox('forgotBox')">Forgot Password?</span>
+  <span class="link" onclick="showBox('signupBox')">Create Account</span>
+</div>
+
+<div class="container hidden" id="signupBox">
+  <h2>Sign Up</h2>
+  <input id="firstName" placeholder="First Name">
+  <input id="lastName" placeholder="Last Name">
+  <input id="phone" placeholder="Phone">
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <input id="age" type="number" placeholder="Age">
+  <input id="qualification" placeholder="Qualification">
+  <input id="image" type="file" accept="image/*">
+  <button onclick="signup()">Create Account</button>
+  <span class="link" onclick="showBox('loginBox')">Back to Login</span>
+</div>
+
+<div class="container hidden" id="forgotBox">
+  <h2>Forgot Password</h2>
+  <input id="forgotInput" placeholder="Email or Phone">
+  <button onclick="sendOTP()">Send OTP</button>
+  <input id="otpInput" class="hidden" placeholder="Enter OTP">
+  <button id="verifyOtpBtn" class="hidden" onclick="verifyOTP()">Verify OTP</button>
+  <input id="newPassword" type="password" class="hidden" placeholder="New Password">
+  <button id="resetBtn" class="hidden" onclick="resetPassword()">Reset Password</button>
+  <span class="link" onclick="showBox('loginBox')">Back to Login</span>
+</div>
+
+<div class="container hidden" id="dashboardBox">
+  <h2>Student Dashboard</h2>
+  <div id="profile"></div>
+  <h3>Courses</h3>
+  <div id="courses"></div>
+  <button onclick="logout()">Logout</button>
+</div>
+
 <script>
-  const SUPABASE_URL = "https://qrjfeuqssirvfjcbmfoj.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFyamZldXFzc2lydmZqY2JtZm9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzNzcxNjQsImV4cCI6MjA3MTk1MzE2NH0.H1ZtSjEvUHacKIPH96d2znlLpeXZ7eAqPBGMz2uvQhY";
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL = "https://qrjfeuqssirvfjcbmfoj.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFyamZldXFzc2lydmZqY2JtZm9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzNzcxNjQsImV4cCI6MjA3MTk1MzE2NH0.H1ZtSjEvUHacKIPH96d2znlLpeXZ7eAqPBGMz2uvQhY";
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // Login
-  async function login() {
-    let { data, error } = await supabase.auth.signInWithPassword({
-      email: document.getElementById("login-email").value,
-      password: document.getElementById("login-password").value,
-    });
-    if (error) alert(error.message);
-    else loadDashboard();
-  }
+function showBox(id) {
+  document.querySelectorAll('.container').forEach(el=>el.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
 
-  // Signup
-  async function signup() {
-    let { data, error } = await supabase.auth.signUp({
-      email: document.getElementById("signup-email").value,
-      password: document.getElementById("signup-password").value,
-    });
-    if (error) alert(error.message);
-    else alert("Check your email to confirm your account!");
-  }
+async function signup() {
+  let email = document.getElementById("email").value;
+  let password = document.getElementById("password").value;
+  let { data, error } = await supabase.auth.signUp({ email, password });
+  if (error) return alert(error.message);
+  
+  let user = data.user;
+  let first_name = document.getElementById("firstName").value;
+  let last_name = document.getElementById("lastName").value;
+  let phone = document.getElementById("phone").value;
+  let age = document.getElementById("age").value;
+  let qualification = document.getElementById("qualification").value;
 
-  // Forgot password
-  async function forgotPassword() {
-    const email = document.getElementById("login-email").value;
-    let { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.href, // back to site after reset
-    });
-    if (error) alert(error.message);
-    else alert("Check your email for password reset link.");
-  }
-
-  // Logout
-  async function logout() {
-    await supabase.auth.signOut();
-    showLogin();
-  }
-
-  // Dashboard loader
-  async function loadDashboard() {
-    let { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      document.getElementById("auth-section").style.display = "none";
-      document.getElementById("signup-section").style.display = "none";
-      document.getElementById("dashboard").style.display = "block";
-      document.getElementById("user-email").innerText = user.email;
-    } else {
-      showLogin();
+  let imageFile = document.getElementById("image").files[0];
+  let imageUrl = null;
+  if (imageFile) {
+    let { data:img, error:imgErr } = await supabase.storage.from("avatars").upload(`public/${user.id}.jpg`, imageFile, { upsert:true });
+    if (!imgErr) {
+      const { data:publicUrl } = supabase.storage.from("avatars").getPublicUrl(`public/${user.id}.jpg`);
+      imageUrl = publicUrl.publicUrl;
     }
   }
 
-  // Helpers
-  function showSignup() {
-    document.getElementById("auth-section").style.display = "none";
-    document.getElementById("signup-section").style.display = "block";
-    document.getElementById("dashboard").style.display = "none";
-  }
+  await supabase.from("profiles").insert([{ id: user.id, first_name, last_name, phone, age, qualification, image_url:imageUrl }]);
+  alert("Account created! Please login.");
+  showBox('loginBox');
+}
 
-  function showLogin() {
-    document.getElementById("auth-section").style.display = "block";
-    document.getElementById("signup-section").style.display = "none";
-    document.getElementById("dashboard").style.display = "none";
-  }
-
-  // Check session on page load
+async function login() {
+  let email = document.getElementById("loginEmail").value;
+  let password = document.getElementById("loginPassword").value;
+  let { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) return alert(error.message);
   loadDashboard();
+}
+
+async function loadDashboard() {
+  showBox("dashboardBox");
+  let { data: { user } } = await supabase.auth.getUser();
+  let { data:profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+  document.getElementById("profile").innerHTML = `
+    <p><b>Name:</b> ${profile.first_name} ${profile.last_name}</p>
+    <p><b>Email:</b> ${user.email}</p>
+    <p><b>Phone:</b> ${profile.phone}</p>
+    <p><b>Age:</b> ${profile.age}</p>
+    <p><b>Qualification:</b> ${profile.qualification}</p>
+    ${profile.image_url ? `<img src="${profile.image_url}" width="100">` : ""}
+  `;
+  let { data:courses } = await supabase.from("courses").select("*").eq("user_id", user.id);
+  let html = "";
+  courses.forEach(c=> html+=`<p>${c.course_name}: ${c.progress}%</p>`);
+  document.getElementById("courses").innerHTML = html || "<p>No courses yet.</p>";
+}
+
+async function logout() {
+  await supabase.auth.signOut();
+  showBox("loginBox");
+}
+
+/* Forgot password with OTP (Email/Phone) */
+async function sendOTP() {
+  let input = document.getElementById("forgotInput").value;
+  if (input.includes("@")) {
+    // email
+    await supabase.auth.resetPasswordForEmail(input);
+    alert("Check your email for reset link!");
+  } else {
+    // phone
+    let { error } = await supabase.auth.signInWithOtp({ phone: input });
+    if (error) alert(error.message);
+    else {
+      document.getElementById("otpInput").classList.remove("hidden");
+      document.getElementById("verifyOtpBtn").classList.remove("hidden");
+    }
+  }
+}
+
+async function verifyOTP() {
+  let phone = document.getElementById("forgotInput").value;
+  let token = document.getElementById("otpInput").value;
+  let { data, error } = await supabase.auth.verifyOtp({ phone, token, type:'sms' });
+  if (error) return alert(error.message);
+  alert("Phone verified! Now set new password.");
+  document.getElementById("newPassword").classList.remove("hidden");
+  document.getElementById("resetBtn").classList.remove("hidden");
+}
+
+async function resetPassword() {
+  let newPass = document.getElementById("newPassword").value;
+  let { error } = await supabase.auth.updateUser({ password: newPass });
+  if (error) return alert(error.message);
+  alert("Password updated. Please login.");
+  showBox("loginBox");
+}
 </script>
 </body>
 <footer class="footer">
@@ -891,5 +950,6 @@ html {
 
 
 </html>
+
 
 
