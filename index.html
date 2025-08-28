@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALL IN ONE, AI-POWERED LANGUAGE LEARNING PLATFORM
-    <script src="https://unpkg.com/@supabase/supabase-js"></script>
-    </title>
+    <title>ALL IN ONE, AI-POWERED LANGUAGE LEARNING PLATFORM</title>
 </head>
     <!-- In your index.html -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -47,6 +45,377 @@
   // Call on load
   loadMessages();
 </script>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Student Portal — Auth & Dashboard</title>
+  <style>
+    :root{--accent:#0f62fe;--muted:#6b7280;--bg:#f6f8fb}
+    *{box-sizing:border-box}body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);margin:0;color:#0f172a}
+    .wrap{max-width:980px;margin:28px auto;padding:18px}
+    .card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 8px 24px rgba(12,18,30,0.06)}
+    .grid{display:grid;grid-template-columns:420px 1fr;gap:18px}
+    @media(max-width:920px){.grid{grid-template-columns:1fr}}
+    h1{margin:0 0 6px;font-size:20px}
+    p.lead{color:var(--muted);margin:0 0 12px}
+
+    label{display:block;font-size:13px;color:var(--muted);margin:8px 0 6px}
+    input[type=text],input[type=email],input[type=password],input[type=number],select{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef8}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:0;background:var(--accent);color:white;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(15,98,254,0.08)}
+    .muted{color:var(--muted);font-size:13px}
+    .small{font-size:13px;color:var(--muted)}
+    .link{color:var(--accent);cursor:pointer}
+
+    .avatar{width:72px;height:72px;border-radius:12px;background:linear-gradient(135deg,#dbeafe,#e9d5ff);display:flex;align-items:center;justify-content:center;font-weight:700;color:#073b4c}
+    .profile-row{display:flex;gap:12px;align-items:center}
+
+    .course{padding:12px;border-radius:10px;border:1px solid #eef6ff;margin-bottom:8px}
+    .progress{height:10px;background:#eef6ff;border-radius:999px;overflow:hidden}
+    .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#06b6d4)}
+
+    footer{margin-top:14px;color:var(--muted);font-size:13px;text-align:center}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="grid">
+      <!-- LEFT: Auth & forms -->
+      <div class="card">
+        <h1 id="panel-title">Sign in to Student Portal</h1>
+        <p class="lead">Login with email + password, or sign up to create your student profile.</p>
+
+        <!-- Sign in -->
+        <div id="signin-panel">
+          <label>Email</label>
+          <input id="signin-email" type="email" placeholder="you@example.com">
+          <label>Password</label>
+          <input id="signin-password" type="password" placeholder="••••••••">
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn" id="btn-signin">Sign In</button>
+            <button class="btn ghost" id="btn-show-signup">Create account</button>
+          </div>
+
+          <div style="margin-top:12px;border-top:1px solid #f0f6ff;padding-top:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div class="small">Or recover account</div>
+              <div>
+                <button class="link" id="btn-forgot">Forgot password?</button>
+              </div>
+            </div>
+            <div class="small" style="margin-top:8px">You can recover by <b>email</b> or <b>phone (OTP)</b>.</div>
+          </div>
+        </div>
+
+        <!-- Sign up -->
+        <div id="signup-panel" style="display:none">
+          <label>First name</label>
+          <input id="su-first" type="text" placeholder="First name">
+          <label>Last name</label>
+          <input id="su-last" type="text" placeholder="Last name">
+          <label>Phone</label>
+          <input id="su-phone" type="text" placeholder="+923001234567">
+          <label>Email</label>
+          <input id="su-email" type="email" placeholder="you@example.com">
+          <label>Password</label>
+          <input id="su-pass" type="password" placeholder="choose a strong password">
+          <label>Age</label>
+          <input id="su-age" type="number" min="1">
+          <label>Qualification</label>
+          <input id="su-qual" type="text">
+          <label>Profile image</label>
+          <input id="su-image" type="file" accept="image/*">
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn" id="btn-signup">Create Account</button>
+            <button class="btn ghost" id="btn-cancel-signup">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Forgot password panel -->
+        <div id="forgot-panel" style="display:none">
+          <label>Enter your email or phone</label>
+          <input id="fp-identifier" placeholder="email@example.com or +92300...">
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn" id="btn-send-reset">Send (email or OTP)</button>
+            <button class="btn ghost" id="btn-cancel-forgot">Cancel</button>
+          </div>
+
+          <div id="fp-otp-row" style="display:none;margin-top:12px">
+            <label>Enter OTP</label>
+            <input id="fp-otp" placeholder="123456">
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="btn" id="btn-verify-otp">Verify OTP</button>
+              <button class="btn ghost" id="btn-resend-otp">Resend OTP</button>
+            </div>
+          </div>
+
+          <div id="fp-newpass-row" style="display:none;margin-top:12px">
+            <label>New password</label>
+            <input id="fp-newpass" type="password" placeholder="new password">
+            <button class="btn" id="btn-set-newpass" style="margin-top:8px">Set new password</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Dashboard preview / after-login area -->
+      <div id="rightPanel" class="card">
+        <!-- Guest view snippet -->
+        <div id="guest-right">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="small">Welcome to</div>
+              <h2 style="margin:6px 0">All-in-One Languages</h2>
+            </div>
+            <div class="avatar">AL</div>
+          </div>
+
+          <p class="small" style="margin-top:12px">Sign in to view your dashboard (profile, courses, progress). Create an account to save your learning progress.</p>
+        </div>
+
+        <!-- Dashboard (hidden until sign in) -->
+        <div id="dashboard" style="display:none">
+          <div class="profile-row" style="justify-content:space-between">
+            <div style="display:flex;gap:12px;align-items:center">
+              <div class="avatar" id="dash-avatar">U</div>
+              <div>
+                <div id="dash-name" style="font-weight:700"></div>
+                <div class="small" id="dash-email"></div>
+              </div>
+            </div>
+            <div>
+              <button class="btn ghost" id="btn-edit-profile">Edit</button>
+              <button class="btn" id="btn-logout">Logout</button>
+            </div>
+          </div>
+
+          <div style="margin-top:14px">
+            <h3 style="margin:6px 0">Overview</h3>
+            <div class="small" id="dash-overview">Loading...</div>
+            <div style="margin-top:12px" id="courses-list"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <footer class="small">Built with Supabase • Host on GitHub Pages</footer>
+  </div>
+
+  <!-- Supabase client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ====== CONFIGURE THESE ======
+    const SUPABASE_URL = "https://qrjfeuqssirvfjcbmfoj.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFyamZldXFzc2lydmZqY2JtZm9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzNzcxNjQsImV4cCI6MjA3MTk1MzE2NH0.H1ZtSjEvUHacKIPH96d2znlLpeXZ7eAqPBGMz2uvQhY";
+    // =============================
+
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Utility
+    const $ = id => document.getElementById(id);
+    const show = id => $(id).style.display = 'block';
+    const hide = id => $(id).style.display = 'none';
+
+    // Initial UI wiring
+    $('btn-show-signup').onclick = ()=>{ hide('signin-panel'); show('signup-panel'); $('panel-title').innerText='Create Account'; }
+    $('btn-cancel-signup').onclick = ()=>{ show('signin-panel'); hide('signup-panel'); $('panel-title').innerText='Sign in to Student Portal'; }
+
+    $('btn-forgot').onclick = ()=>{ hide('signin-panel'); show('forgot-panel'); $('panel-title').innerText='Recover Account'; }
+    $('btn-cancel-forgot').onclick = ()=>{ hide('forgot-panel'); show('signin-panel'); $('panel-title').innerText='Sign in to Student Portal'; }
+
+    // Sign up
+    $('btn-signup').onclick = async ()=>{
+      try{
+        const first = $('su-first').value.trim();
+        const last = $('su-last').value.trim();
+        const phone = $('su-phone').value.trim();
+        const email = $('su-email').value.trim();
+        const pass = $('su-pass').value;
+        const age = parseInt($('su-age').value) || null;
+        const qual = $('su-qual').value.trim();
+        const imageFile = $('su-image').files[0] || null;
+        if(!email || !pass || !first) return alert('Please enter name, email, and password');
+
+        // 1) create auth user
+        const { data: signData, error: signErr } = await supabaseClient.auth.signUp({ email, password: pass });
+        if(signErr) return alert('Signup error: ' + signErr.message);
+        const user = signData.user;
+
+        // 2) upload avatar (optional)
+        let image_url = null;
+        if(imageFile){
+          // ensure you created a public bucket named 'avatars'
+          const path = `public/${user.id}/${imageFile.name}`;
+          const { error: upErr } = await supabaseClient.storage.from('avatars').upload(path, imageFile, { upsert:true });
+          if(upErr) console.warn('avatar upload error', upErr.message);
+          else {
+            const { data: pu } = supabaseClient.storage.from('avatars').getPublicUrl(path);
+            image_url = pu.publicUrl;
+          }
+        }
+
+        // 3) insert profile row
+        const { error: profErr } = await supabaseClient.from('profiles').insert([{ id: user.id, first_name:first, last_name:last, phone, age, qualification:qual, image_url }]);
+        if(profErr) console.warn('profile insert warning', profErr.message);
+
+        alert('Account created! Check your email for confirmation (if enabled). You can now sign in.');
+        // return to sign in view
+        $('btn-cancel-signup').click();
+      }catch(e){ console.error(e); alert('Signup failed'); }
+    };
+
+    // Sign in
+    $('btn-signin').onclick = async ()=>{
+      const email = $('signin-email').value.trim();
+      const password = $('signin-password').value;
+      if(!email || !password) return alert('Enter email and password');
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if(error) return alert('Sign in error: ' + error.message);
+      await onSignedIn();
+    };
+
+    // Forgot password: send email or send phone OTP
+    $('btn-send-reset').onclick = async ()=>{
+      const id = $('fp-identifier').value.trim();
+      if(!id) return alert('Enter email or phone');
+      if(id.includes('@')){
+        // email-based reset (redirect to current page to handle PASSWORD_RECOVERY)
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(id, { redirectTo: window.location.href });
+        if(error) return alert('Error: ' + error.message);
+        alert('Password reset email sent. Check your inbox.');
+      } else {
+        // phone-based OTP
+        const { error } = await supabaseClient.auth.signInWithOtp({ phone: id });
+        if(error) return alert('OTP send error: ' + error.message);
+        alert('OTP sent to phone. Enter it and click Verify.');
+        show('fp-otp-row');
+      }
+    };
+
+    // Verify phone OTP
+    $('btn-verify-otp').onclick = async ()=>{
+      const phone = $('fp-identifier').value.trim();
+      const token = $('fp-otp').value.trim();
+      if(!phone || !token) return alert('Enter phone and OTP');
+      const { data, error } = await supabaseClient.auth.verifyOtp({ phone, token, type:'sms' });
+      if(error) return alert('OTP verify error: ' + error.message);
+      alert('Phone verified. Now set your new password.');
+      show('fp-newpass-row');
+    };
+
+    // Set new password after OTP or recovery
+    $('btn-set-newpass').onclick = async ()=>{
+      const newpass = $('fp-newpass').value;
+      if(!newpass || newpass.length < 6) return alert('Use a password with at least 6 chars');
+      const { error } = await supabaseClient.auth.updateUser({ password: newpass });
+      if(error) return alert('Could not set new password: ' + error.message);
+      alert('Password changed. You can now login.');
+      // back to sign in
+      $('btn-cancel-forgot').click();
+    };
+
+    // Resend OTP (phone)
+    $('btn-resend-otp').onclick = async ()=>{
+      const phone = $('fp-identifier').value.trim();
+      if(!phone) return alert('Enter phone');
+      const { error } = await supabaseClient.auth.signInWithOtp({ phone });
+      if(error) return alert('Resend error: ' + error.message);
+      alert('OTP resent.');
+    };
+
+    // Logout
+    $('btn-logout').onclick = async ()=>{
+      await supabaseClient.auth.signOut();
+      showGuest();
+    };
+
+    // Auth change listener (handles sign-in, password recovery redirects etc.)
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      console.log('auth event', event);
+      if(event === 'SIGNED_IN') onSignedIn();
+      if(event === 'SIGNED_OUT') showGuest();
+      if(event === 'PASSWORD_RECOVERY'){
+        // user clicked reset link and is temporarily signed in to set password
+        alert('Open password reset form below to set a new password.');
+        hide('signin-panel'); hide('signup-panel'); show('forgot-panel'); show('fp-newpass-row');
+      }
+    });
+
+    // When signed in: load profile and courses
+    async function onSignedIn(){
+      try{
+        const { data: u } = await supabaseClient.auth.getUser();
+        const user = u.user;
+        if(!user) return showGuest();
+        // load profile
+        const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', user.id).maybeSingle();
+
+        // update UI
+        hide('signin-panel'); hide('signup-panel'); hide('forgot-panel'); hide('guest-right');
+        show('dashboard');
+        $('dash-name').innerText = (profile?.first_name ? profile.first_name + ' ' + (profile.last_name||'') : (user.email || 'Student'));
+        $('dash-email').innerText = user.email || '';
+        $('dash-avatar').innerText = (profile?.first_name ? profile.first_name.charAt(0).toUpperCase() : 'U');
+
+        // load courses
+        const { data: courses } = await supabaseClient.from('courses').select('*').eq('user_id', user.id).order('created_at', { ascending:false });
+        if(courses && courses.length){
+          $('dash-overview').innerText = `You have ${courses.length} active course(s).`;
+          let html = '';
+          courses.forEach(c=>{
+            const pct = Math.round((c.progress||0));
+            html += `<div class=\"course\"><strong>${escapeHtml(c.course_name)}</strong><div class=\"small\">Progress: ${pct}%</div><div class=\"progress\" style=\"margin-top:8px\"><i style=\"width:${pct}%\"></i></div></div>`;
+          });
+          $('courses-list').innerHTML = html;
+        } else {
+          $('dash-overview').innerText = 'You have no courses yet.';
+          $('courses-list').innerHTML = '<div class="small">No courses yet.</div>';
+        }
+      }catch(e){ console.error(e); }
+    }
+
+    function showGuest(){ show('guest-right'); hide('dashboard'); show('signin-panel'); hide('signup-panel'); hide('forgot-panel'); $('panel-title').innerText='Sign in to Student Portal'; }
+
+    // quick init: check existing session
+    (async ()=>{
+      const { data } = await supabaseClient.auth.getSession();
+      if(data.session) onSignedIn();
+      else showGuest();
+    })();
+
+    // small helper
+    function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    // ----- NOTES: DB & Storage setup (run these in Supabase SQL Editor or Table Editor) -----
+    /*
+    create table public.profiles (
+      id uuid references auth.users(id) primary key,
+      first_name text,
+      last_name text,
+      phone text,
+      age int,
+      qualification text,
+      image_url text,
+      created_at timestamptz default now()
+    );
+
+    create table public.courses (
+      id bigserial primary key,
+      user_id uuid references auth.users(id),
+      course_name text not null,
+      progress int default 0,
+      created_at timestamptz default now()
+    );
+    */
+
+    // create a public storage bucket named 'avatars' (in Supabase Storage) for profile images
+  </script>
+</body>
+</html>
 
 <header>
     <section class="hero">
@@ -58,20 +427,7 @@
     <img src="C:\Users\YASIR ZAHOOR\OneDrive\Pictures\Screenshots\Screenshot (109).png"  alt="logo" width="250px">
   </section>
     <style> 
-         body { font-family: Arial; background:#f5f6fa; margin:0; }
-    .container { max-width:400px; margin:50px auto; padding:20px; background:white; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,.1); }
-    h2 { text-align:center; }
-    input, button, select { width:100%; margin:8px 0; padding:10px; border:1px solid #ddd; border-radius:8px; }
-    button { background:#4CAF50; color:white; border:none; cursor:pointer; }
-    button:hover { background:#45a049; }
-    .link { color:blue; cursor:pointer; text-align:center; display:block; margin-top:10px; }
-    .hidden { display:none; }
-    section{
-        text-align: center;
-        color: rgb(255, 0, 0);
-        font-family: Arial, Helvetica, sans-serif;
-        text-shadow: 2px 2px 5px  brown;
-    }
+    
     html, body {
       margin: 0;
       padding: 0;
@@ -774,153 +1130,7 @@ html {
     }
   };
 </script></p>
-<div class="container" id="loginBox">
-  <h2>Login</h2>
-  <input id="loginEmail" type="email" placeholder="Email">
-  <input id="loginPassword" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-  <span class="link" onclick="showBox('forgotBox')">Forgot Password?</span>
-  <span class="link" onclick="showBox('signupBox')">Create Account</span>
-</div>
 
-<div class="container hidden" id="signupBox">
-  <h2>Sign Up</h2>
-  <input id="firstName" placeholder="First Name">
-  <input id="lastName" placeholder="Last Name">
-  <input id="phone" placeholder="Phone">
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-  <input id="age" type="number" placeholder="Age">
-  <input id="qualification" placeholder="Qualification">
-  <input id="image" type="file" accept="image/*">
-  <button onclick="signup()">Create Account</button>
-  <span class="link" onclick="showBox('loginBox')">Back to Login</span>
-</div>
-
-<div class="container hidden" id="forgotBox">
-  <h2>Forgot Password</h2>
-  <input id="forgotInput" placeholder="Email or Phone">
-  <button onclick="sendOTP()">Send OTP</button>
-  <input id="otpInput" class="hidden" placeholder="Enter OTP">
-  <button id="verifyOtpBtn" class="hidden" onclick="verifyOTP()">Verify OTP</button>
-  <input id="newPassword" type="password" class="hidden" placeholder="New Password">
-  <button id="resetBtn" class="hidden" onclick="resetPassword()">Reset Password</button>
-  <span class="link" onclick="showBox('loginBox')">Back to Login</span>
-</div>
-
-<div class="container hidden" id="dashboardBox">
-  <h2>Student Dashboard</h2>
-  <div id="profile"></div>
-  <h3>Courses</h3>
-  <div id="courses"></div>
-  <button onclick="logout()">Logout</button>
-</div>
-
-<script>
-const SUPABASE_URL = "https://qrjfeuqssirvfjcbmfoj.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFyamZldXFzc2lydmZqY2JtZm9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzNzcxNjQsImV4cCI6MjA3MTk1MzE2NH0.H1ZtSjEvUHacKIPH96d2znlLpeXZ7eAqPBGMz2uvQhY";
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-function showBox(id) {
-  document.querySelectorAll('.container').forEach(el=>el.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
-}
-
-async function signup() {
-  let email = document.getElementById("email").value;
-  let password = document.getElementById("password").value;
-  let { data, error } = await supabase.auth.signUp({ email, password });
-  if (error) return alert(error.message);
-  
-  let user = data.user;
-  let first_name = document.getElementById("firstName").value;
-  let last_name = document.getElementById("lastName").value;
-  let phone = document.getElementById("phone").value;
-  let age = document.getElementById("age").value;
-  let qualification = document.getElementById("qualification").value;
-
-  let imageFile = document.getElementById("image").files[0];
-  let imageUrl = null;
-  if (imageFile) {
-    let { data:img, error:imgErr } = await supabase.storage.from("avatars").upload(`public/${user.id}.jpg`, imageFile, { upsert:true });
-    if (!imgErr) {
-      const { data:publicUrl } = supabase.storage.from("avatars").getPublicUrl(`public/${user.id}.jpg`);
-      imageUrl = publicUrl.publicUrl;
-    }
-  }
-
-  await supabase.from("profiles").insert([{ id: user.id, first_name, last_name, phone, age, qualification, image_url:imageUrl }]);
-  alert("Account created! Please login.");
-  showBox('loginBox');
-}
-
-async function login() {
-  let email = document.getElementById("loginEmail").value;
-  let password = document.getElementById("loginPassword").value;
-  let { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return alert(error.message);
-  loadDashboard();
-}
-
-async function loadDashboard() {
-  showBox("dashboardBox");
-  let { data: { user } } = await supabase.auth.getUser();
-  let { data:profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-  document.getElementById("profile").innerHTML = `
-    <p><b>Name:</b> ${profile.first_name} ${profile.last_name}</p>
-    <p><b>Email:</b> ${user.email}</p>
-    <p><b>Phone:</b> ${profile.phone}</p>
-    <p><b>Age:</b> ${profile.age}</p>
-    <p><b>Qualification:</b> ${profile.qualification}</p>
-    ${profile.image_url ? `<img src="${profile.image_url}" width="100">` : ""}
-  `;
-  let { data:courses } = await supabase.from("courses").select("*").eq("user_id", user.id);
-  let html = "";
-  courses.forEach(c=> html+=`<p>${c.course_name}: ${c.progress}%</p>`);
-  document.getElementById("courses").innerHTML = html || "<p>No courses yet.</p>";
-}
-
-async function logout() {
-  await supabase.auth.signOut();
-  showBox("loginBox");
-}
-
-/* Forgot password with OTP (Email/Phone) */
-async function sendOTP() {
-  let input = document.getElementById("forgotInput").value;
-  if (input.includes("@")) {
-    // email
-    await supabase.auth.resetPasswordForEmail(input);
-    alert("Check your email for reset link!");
-  } else {
-    // phone
-    let { error } = await supabase.auth.signInWithOtp({ phone: input });
-    if (error) alert(error.message);
-    else {
-      document.getElementById("otpInput").classList.remove("hidden");
-      document.getElementById("verifyOtpBtn").classList.remove("hidden");
-    }
-  }
-}
-
-async function verifyOTP() {
-  let phone = document.getElementById("forgotInput").value;
-  let token = document.getElementById("otpInput").value;
-  let { data, error } = await supabase.auth.verifyOtp({ phone, token, type:'sms' });
-  if (error) return alert(error.message);
-  alert("Phone verified! Now set new password.");
-  document.getElementById("newPassword").classList.remove("hidden");
-  document.getElementById("resetBtn").classList.remove("hidden");
-}
-
-async function resetPassword() {
-  let newPass = document.getElementById("newPassword").value;
-  let { error } = await supabase.auth.updateUser({ password: newPass });
-  if (error) return alert(error.message);
-  alert("Password updated. Please login.");
-  showBox("loginBox");
-}
-</script>
 </body>
 <footer class="footer">
   <div class="footer-container">
@@ -950,6 +1160,7 @@ async function resetPassword() {
 
 
 </html>
+
 
 
 
