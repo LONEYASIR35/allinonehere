@@ -5,6 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ALL IN ONE, AI-POWERED LANGUAGE LEARNING PLATFORM</title>
 </head>
+    <!-- In your index.html -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Replace with your values from Supabase Settings → API
+  const SUPABASE_URL = "https://qrjfeuqssirvfjcbmfoj.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFyamZldXFzc2lydmZqY2JtZm9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzNzcxNjQsImV4cCI6MjA3MTk1MzE2NH0.H1ZtSjEvUHacKIPH96d2znlLpeXZ7eAqPBGMz2uvQhY"; // anon public
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Sign in with magic link (email OTP)
+  async function signIn(email) {
+    const { error } = await supabase.auth.signInWithOtp({ email });
+    if (error) alert(error.message);
+    else alert("Check your email for the magic link!");
+  }
+
+  // Insert a message (must be signed in)
+  async function addMessage(text) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return alert("Please sign in first.");
+    const { error } = await supabase.from('messages').insert({ content: text, user_id: user.id });
+    if (error) alert(error.message);
+  }
+
+  // Load & render messages
+  async function loadMessages() {
+    const { data, error } = await supabase.from('messages').select('*').order('created_at', { ascending: false });
+    if (error) return console.error(error);
+    document.getElementById('messages').innerHTML =
+      data.map(m => `<li>${new Date(m.created_at).toLocaleString()} — ${m.content}</li>`).join('');
+  }
+
+  // Realtime updates (optional)
+  supabase.channel('realtime:messages')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, loadMessages)
+    .subscribe();
+
+  // Call on load
+  loadMessages();
+</script>
+
 <header>
     <section class="hero">
     <div class="hero-content">
@@ -545,7 +586,14 @@ html {
 <a href="#top" class="back-to-top" title="Go to top">↑</a>
 
 <body>
-     
+     <input id="email" placeholder="your@email.com">
+<button onclick="signIn(document.getElementById('email').value)">Send magic link</button>
+
+<input id="msg" placeholder="write a message">
+<button onclick="addMessage(document.getElementById('msg').value)">Send</button>
+
+<ul id="messages"></ul>
+
   <section id="Home">
     <h1>Introduction to our WebSite</h1>
   </section>
@@ -787,3 +835,4 @@ html {
 
 
 </html>
+
